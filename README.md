@@ -10,7 +10,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
  git clone https://github.com/shinjondas/Instagram-API/
 ```
 ## Functionalities
-- Adding new user to platform
+- Adding new user to platform![New User](https://github.com/shinjondas/Instagram-API/output/PostUser.png?raw=true)
 - Retrieving data regarding a user
 - Adding new post to platform
 - Retrieving all data related to that post
