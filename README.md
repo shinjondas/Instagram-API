@@ -10,11 +10,11 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
  git clone https://github.com/shinjondas/Instagram-API/
 ```
 ## Functionalities
-- Adding new user to platform![New User](https://github.com/shinjondas/Instagram-API/output/PostUser.png?raw=true)
-- Retrieving data regarding a user
-- Adding new post to platform
-- Retrieving all data related to that post
-- Getting all posts posted from a given userID
+- Adding new user to platform![New User](https://github.com/shinjondas/Instagram-API/blob/main/output/PostUser.PNG)
+- Retrieving data regarding a user ![Get User](https://github.com/shinjondas/Instagram-API/blob/main/output/GetUser.PNG)
+- Adding new post to platform![Create Post](https://github.com/shinjondas/Instagram-API/blob/main/output/PostPost.PNG)
+- Retrieving all data related to that post![Fetch Post](https://github.com/shinjondas/Instagram-API/blob/main/output/GetPost.PNG)
+- Getting all posts posted from a given userID![Fetch All Posts of a user](https://github.com/shinjondas/Instagram-API/blob/main/output/AllPostsOfUser.PNG)
 - Encrypted paswords for added security using [md5](https://en.wikipedia.org/wiki/MD5)
 
 ## Usage
