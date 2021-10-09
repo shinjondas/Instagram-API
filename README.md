@@ -4,7 +4,7 @@ This API has been solely programmed on [Go](https://golang.org/), and for databa
 
 ## Cloning repository
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Use git to clone the repository as follows.
 
 ```bash
  git clone https://github.com/shinjondas/Instagram-API/
