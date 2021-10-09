@@ -23,6 +23,14 @@ type User struct {
 	Password string `json:"password,omitempty" bson:"password,omitempty"`
 }
 
+//Creating structure for post
+type Post struct {
+	ID       string    `json:"id,omitempty" bson:"_id,omitempty"`
+	Caption  string    `json:"caption,omitempty" bson:"caption,omitempty"`
+	ImgURL   string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	PostTime time.Time `json:"postTime,omitempty" bson:"postTime,omitempty"`
+}
+
 func main() {
 	fmt.Println("Server started...")
 	connect()
@@ -55,9 +63,9 @@ func handleRequest() {
 	http.HandleFunc("/users", createUser)
 	http.HandleFunc("/userGet", getAllUsers)
 	http.HandleFunc("/users/", searchUser)
-	/*http.HandleFunc("/posts", createPost)
-	http.HandleFunc("/postGet", getAllPosts)
-	http.HandleFunc("/posts/", searchPost)*/
+	http.HandleFunc("/posts", createPost)
+	//http.HandleFunc("/postGet", getAllPosts)
+	http.HandleFunc("/posts/", searchPost)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe", err)
@@ -129,4 +137,44 @@ func searchUser(response http.ResponseWriter, request *http.Request) {
 	}
 	fmt.Println("Returned User ID NO : ", user.ID)
 	json.NewEncoder(response).Encode(user)
+}
+
+//Creating post
+func createPost(response http.ResponseWriter, request *http.Request) {
+	request.ParseForm()
+	decoder := json.NewDecoder(request.Body)
+	var newPost Post
+	log.Println("Created post at:", time.Now())
+	newPost.PostTime = time.Now()
+	err := decoder.Decode(&newPost)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(newPost.ID)
+	collection := client.Database("test").Collection("User_Post")
+	insertResult, err := collection.InsertOne(context.TODO(), newPost)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Inserted post with ID:", insertResult.InsertedID)
+}
+
+func searchPost(response http.ResponseWriter, request *http.Request) {
+	request.ParseForm()
+	var id string = request.URL.Path
+	id = strings.TrimPrefix(id, "/posts/")
+	var FoundPost Post
+	collection := client.Database("test").Collection("User_Post")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&FoundPost)
+	log.Println(FoundPost)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write([]byte(`{ "message": "` + err.Error() + `" }`))
+		return
+	}
+	fmt.Println("Returned User ID NO : ", FoundPost.ID)
+	json.NewEncoder(response).Encode(FoundPost)
 }
