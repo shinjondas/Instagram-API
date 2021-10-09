@@ -2,8 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/md5"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -100,6 +106,8 @@ func searchAllPosts(response http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(response).Encode(userPost)
 }
 
+var SECRET_KEY string = "loremipsum"
+
 //Creating user for platform
 func createUser(response http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
@@ -111,12 +119,30 @@ func createUser(response http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	log.Println(newUser.ID)
+	newUser.Password = string(encrypt([]byte(newUser.Password), SECRET_KEY))
 	collection := client.Database("test").Collection("User_Test")
 	insertResult, err := collection.InsertOne(context.TODO(), newUser)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Inserted post with ID:", insertResult.InsertedID)
+}
+
+//Encrypting password
+func encrypt(data []byte, passphrase string) []byte {
+	hasher := md5.New()
+	hasher.Write([]byte(passphrase))
+	block, _ := aes.NewCipher([]byte(hex.EncodeToString(hasher.Sum(nil))))
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err.Error())
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
+	}
+	ciphertext := gcm.Seal(nonce, nonce, data, nil)
+	return ciphertext
 }
 
 //Search user from ID
