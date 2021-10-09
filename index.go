@@ -61,11 +61,10 @@ func connect() {
 //Create function to handle all GET/POST Requests and routing
 func handleRequest() {
 	http.HandleFunc("/users", createUser)
-	http.HandleFunc("/userGet", getAllUsers)
 	http.HandleFunc("/users/", searchUser)
 	http.HandleFunc("/posts", createPost)
-	//http.HandleFunc("/postGet", getAllPosts)
 	http.HandleFunc("/posts/", searchPost)
+	http.HandleFunc("/posts/users/", searchAllPosts)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe", err)
@@ -73,12 +72,15 @@ func handleRequest() {
 }
 
 //Getting all users
-func getAllUsers(response http.ResponseWriter, request *http.Request) {
-	var users []User
-	collection := client.Database("test").Collection("User_Test")
+func searchAllPosts(response http.ResponseWriter, request *http.Request) {
+	request.ParseForm()
+	var id string = request.URL.Path
+	id = strings.TrimPrefix(id, "/posts/users/")
+	var userPost []Post
+	collection := client.Database("test").Collection("User_Post")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cursor, err := collection.Find(ctx, bson.M{})
+	cursor, err := collection.Find(ctx, bson.M{"_id": id})
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{ "message": "` + err.Error() + `" }`))
@@ -86,16 +88,16 @@ func getAllUsers(response http.ResponseWriter, request *http.Request) {
 	}
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
-		var user User
-		cursor.Decode(&user)
-		users = append(users, user)
+		var post Post
+		cursor.Decode(&post)
+		userPost = append(userPost, post)
 	}
 	if err = cursor.Err(); err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		response.Write([]byte(`{ "message": "` + err.Error() + `" }`))
 		return
 	}
-	json.NewEncoder(response).Encode(users)
+	json.NewEncoder(response).Encode(userPost)
 }
 
 //Creating user for platform
@@ -117,8 +119,7 @@ func createUser(response http.ResponseWriter, request *http.Request) {
 	fmt.Println("Inserted post with ID:", insertResult.InsertedID)
 }
 
-//Search user from URL
-
+//Search user from ID
 func searchUser(response http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 	var id string = request.URL.Path
@@ -135,7 +136,7 @@ func searchUser(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte(`{ "message": "` + err.Error() + `" }`))
 		return
 	}
-	fmt.Println("Returned User ID NO : ", user.ID)
+	fmt.Println("Returned User ID : ", user.ID)
 	json.NewEncoder(response).Encode(user)
 }
 
@@ -159,6 +160,7 @@ func createPost(response http.ResponseWriter, request *http.Request) {
 	fmt.Println("Inserted post with ID:", insertResult.InsertedID)
 }
 
+//Searching post from ID
 func searchPost(response http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 	var id string = request.URL.Path
@@ -175,6 +177,6 @@ func searchPost(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte(`{ "message": "` + err.Error() + `" }`))
 		return
 	}
-	fmt.Println("Returned User ID NO : ", FoundPost.ID)
+	fmt.Println("Returned User ID : ", FoundPost.ID)
 	json.NewEncoder(response).Encode(FoundPost)
 }
