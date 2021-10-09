@@ -9,6 +9,13 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 ```bash
  git clone https://github.com/shinjondas/Instagram-API/
 ```
+## Functionalities
+- Adding new user to platform
+- Retrieving data regarding a user
+- Adding new post to platform
+- Retrieving all data related to that post
+- Getting all posts posted from a given userID
+- Encrypted paswords for added security using [md5](https://en.wikipedia.org/wiki/MD5)
 
 ## Usage
 
